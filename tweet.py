@@ -19,7 +19,10 @@ client = tweepy.Client(
 feeds = [
     "https://cointelegraph.com/rss",
     "https://decrypt.co/feed",
-    "https://www.theblock.co/feeds/rss"
+    "https://www.theblock.co/feeds/rss",
+    "https://bitcoinmagazine.com/.rss/full/",
+    "https://cryptoslate.com/feed/",
+    "https://www.newsbtc.com/feed/"
 ]
 
 # Intentar encontrar un feed con entradas
