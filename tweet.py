@@ -68,14 +68,46 @@ if not hashtags:
 hashtags_text = " ".join(hashtags)
 
 # Crear el texto del tweet
-tweet_text = f"{title}\n\n{summary}\n\n{hashtags_text}\n{url}"
+from transformers import pipeline
 
-# Limitar longitud máxima de tweet (280 caracteres)
+# Preparar el texto original
+text_to_summarize = f"{title}\n\n{summary}"
+
+# Cargar el pipeline de resumen (solo se hace una vez al principio)
+summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+
+# Generar el resumen
+huggingface_summary = summarizer(
+    text_to_summarize,
+    max_length=60,
+    min_length=20,
+    do_sample=False
+)[0]['summary_text']
+
+# Hashtags simples por palabras clave
+hashtags = []
+
+if "bitcoin" in title.lower():
+    hashtags.append("#Bitcoin")
+if "ethereum" in title.lower():
+    hashtags.append("#Ethereum")
+if "defi" in title.lower():
+    hashtags.append("#DeFi")
+if "nft" in title.lower():
+    hashtags.append("#NFT")
+if not hashtags:
+    hashtags.append("#Crypto")
+
+hashtags_text = " ".join(hashtags)
+
+# Crear el tweet final con el resumen
+tweet_text = f"{huggingface_summary}\n\n{hashtags_text}\n{url}"
+
+# Limitar longitud máxima de tweet
 if len(tweet_text) > 280:
-    # Truncar el summary si se pasa
-    allowed_summary_length = 280 - len(title) - len(url) - len(hashtags_text) - 10
-    summary = summary[:allowed_summary_length] + "..."
-    tweet_text = f"{title}\n\n{summary}\n\n{hashtags_text}\n{url}"
+    allowed_summary_length = 280 - len(hashtags_text) - len(url) - 10
+    huggingface_summary = huggingface_summary[:allowed_summary_length] + "..."
+    tweet_text = f"{huggingface_summary}\n\n{hashtags_text}\n{url}"
 
 # Publicar el tweet
 response = client.create_tweet(
